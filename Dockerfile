@@ -1,5 +1,5 @@
-# Используем базовый образ с Chrome и ChromeDriver
-FROM selenium/standalone-chrome:latest AS chrome_base
+# Используем образ с Chrome и ChromeDriver нужной версии
+FROM selenium/standalone-chrome:134.0 AS chrome_base
 
 # Используем образ с JDK 21 и Maven для сборки
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
@@ -12,15 +12,15 @@ RUN mvn dependency:go-offline
 COPY src ./src
 RUN mvn clean package -DskipTests
 
-# Финальный минимальный образ на основе selenium/standalone-chrome
+# Финальный минимальный образ на основе Chrome
 FROM chrome_base
 
-# Проверяем доступного пользователя и получаем root-доступ
+# Устанавливаем пользователя root для установки зависимостей
 USER 0
 
 WORKDIR /app
 
-# Устанавливаем дополнительные зависимости, если нужны
+# Устанавливаем дополнительные зависимости
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     wget \
     curl \
@@ -29,7 +29,17 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Возвращаемся обратно к обычному пользователю для безопасности
+# Указываем точную версию ChromeDriver
+ENV CHROMEDRIVER_VERSION=134.0.6998.88
+
+# Скачиваем и устанавливаем ChromeDriver вручную
+RUN wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" \
+    && unzip chromedriver_linux64.zip \
+    && mv chromedriver /usr/bin/chromedriver \
+    && chmod +x /usr/bin/chromedriver \
+    && rm chromedriver_linux64.zip
+
+# Возвращаемся обратно к пользователю seluser
 USER seluser
 
 # Копируем JAR-файл из builder-образа

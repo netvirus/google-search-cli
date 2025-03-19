@@ -11,7 +11,8 @@ public class BrowserManager {
     public static WebDriver getDriver() {
         if (driver == null) {
             // Устанавливаем ChromeDriver, если он не установлен
-            WebDriverManager.chromedriver().setup();
+            //            WebDriverManager.chromedriver().setup();
+            System.setProperty("webdriver.chrome.driver", "/usr/bin/chromedriver");
 
             // Создаём объект настроек Chrome
             ChromeOptions options = new ChromeOptions();
