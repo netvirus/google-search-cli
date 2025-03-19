@@ -1,83 +1,35 @@
-# Используем образ с JDK 21 и Maven
+# Используем базовый образ с Chrome и ChromeDriver
+FROM selenium/standalone-chrome:latest AS chrome_base
+
+# Используем образ с JDK 21 и Maven для сборки
 FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем POM-файл и загружаем зависимости
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Копируем исходный код проекта
 COPY src ./src
-
-# Собираем проект (генерируем fat JAR с учетом плагинов)
 RUN mvn clean package -DskipTests
 
-# Финальный минимальный образ с JRE 21
-FROM eclipse-temurin:21-jre
+# Финальный минимальный образ на основе selenium/standalone-chrome
+FROM chrome_base
 
-# Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем зависимости для Chrome
+# Устанавливаем дополнительные зависимости, если нужны
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     wget \
     curl \
     unzip \
-    libnss3 \
-    libxss1 \
-    libappindicator3-1 \
-    fonts-liberation \
-    libgbm1 \
-    libxshmfence1 \
-    libdouble-conversion3 \
-    libminizip1 \
-    libasound2t64 \
     ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем Google Chrome и исправляем зависимости
-RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-    && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
-    && rm google-chrome-stable_current_amd64.deb
-
-# Проверяем, установлен ли Chrome, если нет — исправляем
-RUN if ! command -v google-chrome-stable; then \
-        echo "Google Chrome is missing, reinstalling..."; \
-        apt-get update -y && apt-get install -y --reinstall google-chrome-stable; \
-    fi
-
-# Убеждаемся, что Chrome в PATH
-RUN echo "Checking Chrome install:" && dpkg -L google-chrome-stable && command -v google-chrome-stable
-
-# Добавляем симлинк, если нужно
-RUN if [ ! -f "/usr/bin/google-chrome" ]; then \
-        echo "Creating symlink for google-chrome"; \
-        ln -s /usr/bin/google-chrome-stable /usr/bin/google-chrome; \
-    fi
-
-# Проверяем, что Chrome установлен
-RUN ls -l /usr/bin/google-* && command -v google-chrome
-
-# Определяем версию Chrome и загружаем соответствующий ChromeDriver
-RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
-    && echo "Detected Chrome version: $CHROME_VERSION" \
-    && wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" -O chromedriver_version \
-    && CHROMEDRIVER_VERSION=$(cat chromedriver_version) \
-    && echo "Detected ChromeDriver version: $CHROMEDRIVER_VERSION" \
-    && wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" \
-    && unzip chromedriver_linux64.zip \
-    && mv chromedriver /usr/bin/chromedriver \
-    && chmod +x /usr/bin/chromedriver \
-    && rm chromedriver_linux64.zip chromedriver_version
-
-# Указываем переменные среды для Chrome и ChromeDriver
-ENV PATH="/usr/bin:${PATH}"
-
-# Проверяем реальное имя JAR-файла
+# Копируем JAR-файл из builder-образа
 COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
 
-# Указываем команду запуска при старте контейнера
+# Устанавливаем переменные среды для Chrome и ChromeDriver
+ENV PATH="/usr/bin:${PATH}"
+
 ENTRYPOINT ["java", "-jar", "google-search-cli.jar"]
