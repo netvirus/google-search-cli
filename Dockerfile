@@ -43,10 +43,19 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# Проверяем и исправляем путь к Chrome
+# Проверяем, установлен ли Chrome, если нет — исправляем
+RUN if ! command -v google-chrome-stable; then \
+        echo "Google Chrome is missing, reinstalling..."; \
+        apt-get update -y && apt-get install -y --reinstall google-chrome-stable; \
+    fi
+
+# Убеждаемся, что Chrome в PATH
+RUN echo "Checking Chrome install:" && dpkg -L google-chrome-stable && command -v google-chrome-stable
+
+# Добавляем симлинк, если нужно
 RUN if [ ! -f "/usr/bin/google-chrome" ]; then \
-        echo "Google Chrome binary not found, creating symlink..."; \
-        ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome; \
+        echo "Creating symlink for google-chrome"; \
+        ln -s /usr/bin/google-chrome-stable /usr/bin/google-chrome; \
     fi
 
 # Проверяем, что Chrome установлен
@@ -64,11 +73,11 @@ RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 
     && chmod +x /usr/bin/chromedriver \
     && rm chromedriver_linux64.zip chromedriver_version
 
-# Проверяем реальное имя JAR-файла
-COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
-
 # Указываем переменные среды для Chrome и ChromeDriver
 ENV PATH="/usr/bin:${PATH}"
+
+# Проверяем реальное имя JAR-файла
+COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
 
 # Указываем команду запуска при старте контейнера
 ENTRYPOINT ["java", "-jar", "google-search-cli.jar"]
