@@ -43,11 +43,11 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# Проверяем, что Chrome действительно установлен и создаем ссылку
-RUN if ! command -v google-chrome; then \
-        echo "Google Chrome is missing! Trying manual fix..."; \
-        ln -s /usr/bin/google-chrome-stable /usr/bin/google-chrome || exit 1; \
-    fi
+# Делаем Chrome доступным в системе
+RUN ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome
+
+# Проверяем, что Chrome установлен
+RUN if ! command -v google-chrome; then echo "Google Chrome is still missing!"; exit 1; fi
 
 # Определяем версию Chrome и загружаем соответствующий ChromeDriver
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
