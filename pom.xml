@@ -15,49 +15,49 @@
     </properties>
 
     <dependencies>
-        <!-- Selenium -->
+        <!-- Selenium для работы с браузером -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.29.0</version>
+            <version>4.12.1</version>  <!-- Версия совместимая с Chrome 114 -->
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v114 -->
+        <!-- Selenium DevTools для CDP 114 -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-devtools-v114</artifactId>
-            <version>4.12.1</version>
+            <version>4.12.1</version>  <!-- Версия, соответствующая CDP 114 -->
         </dependency>
 
-
-        <!-- WebDriverManager -->
+        <!-- WebDriverManager для управления ChromeDriver (опционально) -->
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
-            <version>5.9.3</version>
+            <version>5.9.3</version>  <!-- Последняя стабильная версия для Chrome 114 -->
         </dependency>
 
-        <!-- Picocli -->
+        <!-- Picocli для обработки аргументов командной строки -->
         <dependency>
             <groupId>info.picocli</groupId>
             <artifactId>picocli</artifactId>
             <version>4.6.3</version>
         </dependency>
 
-        <!-- SLF4J + Logback -->
+        <!-- SLF4J + Logback для логирования -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.5.17</version>
         </dependency>
 
-        <!-- Jackson -->
+        <!-- Jackson для работы с JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.14.1</version>
         </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
