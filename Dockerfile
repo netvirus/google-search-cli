@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Используем Selenium Standalone Chrome с нужной версией Chrome и ChromeDriver
-FROM selenium/standalone-chrome:114.0  # Выбираем версию с поддержкой CDP 131
+FROM selenium/standalone-chrome:114.0
 
 WORKDIR /app
 
