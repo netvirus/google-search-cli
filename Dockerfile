@@ -4,15 +4,18 @@ FROM maven:3.9.6-eclipse-temurin-21 AS builder
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем pom.xml и загружаем зависимости
+# Копируем POM-файл и загружаем зависимости
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
-# Копируем весь исходный код проекта
+# Копируем исходный код проекта
 COPY src ./src
 
-# Собираем проект
+# Собираем проект (генерируем fat JAR с учетом плагинов)
 RUN mvn clean package -DskipTests
+
+# Проверяем, какой JAR-файл был сгенерирован
+RUN ls -l target
 
 # Финальный минимальный образ с JRE 21
 FROM eclipse-temurin:21-jre
@@ -20,8 +23,8 @@ FROM eclipse-temurin:21-jre
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем скомпилированный JAR-файл из предыдущего этапа
-COPY --from=builder /app/target/google-search-cli.jar ./google-search-cli.jar
+# Проверяем реальное имя JAR-файла
+COPY --from=builder /app/target/*.jar ./google-search-cli.jar
 
 # Указываем команду запуска при старте контейнера
 ENTRYPOINT ["java", "-jar", "google-search-cli.jar"]
