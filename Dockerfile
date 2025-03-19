@@ -1,22 +1,20 @@
-# Используем официальный образ JDK 21
-FROM eclipse-temurin:21-jdk as builder
+# Используем образ с JDK 21 и Maven
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем файл сборки Maven (pom.xml) и зависимости
+# Копируем pom.xml и загружаем зависимости
 COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Загружаем зависимости
-RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline
-
-# Копируем исходный код проекта
+# Копируем весь исходный код проекта
 COPY src ./src
 
 # Собираем проект
 RUN mvn clean package -DskipTests
 
-# Создаём финальный минимизированный образ
+# Финальный минимальный образ с JRE 21
 FROM eclipse-temurin:21-jre
 
 # Устанавливаем рабочую директорию
