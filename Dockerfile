@@ -15,7 +15,8 @@ RUN mvn clean package -DskipTests
 # Финальный минимальный образ на основе selenium/standalone-chrome
 FROM chrome_base
 
-USER root  # Меняем пользователя на root для установки пакетов
+# Проверяем доступного пользователя и получаем root-доступ
+USER 0
 
 WORKDIR /app
 
