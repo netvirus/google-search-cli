@@ -22,12 +22,13 @@
             <version>4.29.0</version>
         </dependency>
 
-        <!-- Selenium DevTools для CDP 131 -->
+        <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-devtools-v114 -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-devtools-v131</artifactId>
-            <version>4.29.0</version>
+            <artifactId>selenium-devtools-v114</artifactId>
+            <version>4.12.1</version>
         </dependency>
+
 
         <!-- WebDriverManager -->
         <dependency>
