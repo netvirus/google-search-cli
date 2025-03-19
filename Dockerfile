@@ -15,6 +15,8 @@ RUN mvn clean package -DskipTests
 # Финальный минимальный образ на основе selenium/standalone-chrome
 FROM chrome_base
 
+USER root  # Меняем пользователя на root для установки пакетов
+
 WORKDIR /app
 
 # Устанавливаем дополнительные зависимости, если нужны
@@ -26,10 +28,11 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Возвращаемся обратно к обычному пользователю для безопасности
+USER seluser
+
 # Копируем JAR-файл из builder-образа
 COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
 
-# Устанавливаем переменные среды для Chrome и ChromeDriver
-ENV PATH="/usr/bin:${PATH}"
-
+# Указываем команду запуска
 ENTRYPOINT ["java", "-jar", "google-search-cli.jar"]
