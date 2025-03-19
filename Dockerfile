@@ -33,7 +33,7 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     libxshmfence1 \
     libdouble-conversion3 \
     libminizip1 \
-    libasound2 \
+    libasound2t64 \
     ca-certificates \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
