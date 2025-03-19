@@ -20,20 +20,21 @@ FROM eclipse-temurin:21-jre
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем зависимости для Chrome
-RUN apt-get update -y && apt-get install -y \
+# Устанавливаем зависимости для Chrome (без libasound2)
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
     wget \
     curl \
     unzip \
     libnss3 \
     libxss1 \
     libappindicator3-1 \
-    libasound2 \
     fonts-liberation \
     libgbm1 \
     libxshmfence1 \
     libdouble-conversion3 \
-    libminizip1
+    libminizip1 \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем Google Chrome
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
