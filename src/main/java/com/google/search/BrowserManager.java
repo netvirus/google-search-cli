@@ -15,6 +15,7 @@ public class BrowserManager {
 
             // Создаём объект настроек Chrome
             ChromeOptions options = new ChromeOptions();
+            options.setBinary("/usr/bin/google-chrome");
             options.addArguments("--headless"); // Запуск в headless-режиме (обязательно для Docker)
             options.addArguments("--no-sandbox"); // Отключаем sandbox для запуска в контейнере
             options.addArguments("--disable-dev-shm-usage"); // Используем shared memory
