@@ -43,11 +43,14 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# Делаем Chrome доступным в системе
-RUN ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome
+# Проверяем и исправляем путь к Chrome
+RUN if [ ! -f "/usr/bin/google-chrome" ]; then \
+        echo "Google Chrome binary not found, creating symlink..."; \
+        ln -sf /usr/bin/google-chrome-stable /usr/bin/google-chrome; \
+    fi
 
 # Проверяем, что Chrome установлен
-RUN if ! command -v google-chrome; then echo "Google Chrome is still missing!"; exit 1; fi
+RUN ls -l /usr/bin/google-* && command -v google-chrome
 
 # Определяем версию Chrome и загружаем соответствующий ChromeDriver
 RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
