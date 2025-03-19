@@ -33,13 +33,16 @@ RUN apt-get update -y && apt-get install -y --no-install-recommends \
     libxshmfence1 \
     libdouble-conversion3 \
     libminizip1 \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
+    libasound2 \
+    ca-certificates \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Устанавливаем Google Chrome
+# Устанавливаем Google Chrome и исправляем зависимости
 RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
-    && rm google-chrome-stable_current_amd64.deb
+    && rm google-chrome-stable_current_amd64.deb \
+    && ln -s /usr/bin/google-chrome /usr/bin/chrome
 
 # Проверяем, что Chrome установлен
 RUN if ! command -v google-chrome; then echo "Google Chrome is missing"; exit 1; fi
