@@ -20,7 +20,7 @@ FROM eclipse-temurin:21-jre
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Устанавливаем зависимости для Chrome (без libasound2)
+# Устанавливаем зависимости для Chrome
 RUN apt-get update -y && apt-get install -y --no-install-recommends \
     wget \
     curl \
@@ -41,12 +41,17 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
     && dpkg -i google-chrome-stable_current_amd64.deb || apt-get -fy install \
     && rm google-chrome-stable_current_amd64.deb
 
-# Устанавливаем ChromeDriver (версию под Chrome)
-RUN wget -q https://chromedriver.storage.googleapis.com/134.0.6342.0/chromedriver_linux64.zip \
+# Определяем версию Chrome
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d '.' -f 1) \
+    && echo "Detected Chrome version: $CHROME_VERSION" \
+    && wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" -O chromedriver_version \
+    && CHROMEDRIVER_VERSION=$(cat chromedriver_version) \
+    && echo "Detected ChromeDriver version: $CHROMEDRIVER_VERSION" \
+    && wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" \
     && unzip chromedriver_linux64.zip \
     && mv chromedriver /usr/bin/chromedriver \
     && chmod +x /usr/bin/chromedriver \
-    && rm chromedriver_linux64.zip
+    && rm chromedriver_linux64.zip chromedriver_version
 
 # Проверяем реальное имя JAR-файла
 COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
