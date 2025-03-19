@@ -24,7 +24,7 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Проверяем реальное имя JAR-файла
-COPY --from=builder /app/target/*.jar ./google-search-cli.jar
+COPY --from=builder /app/target/google-search-cli-1.0-SNAPSHOT.jar ./google-search-cli.jar
 
 # Указываем команду запуска при старте контейнера
 ENTRYPOINT ["java", "-jar", "google-search-cli.jar"]
